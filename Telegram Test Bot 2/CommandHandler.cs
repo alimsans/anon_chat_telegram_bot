@@ -6,7 +6,7 @@ using Telegram.Bot.Types;
 
 
 
-namespace Telegram_Test_Bot_2
+namespace ChatBot
 {
     class CommandHandler
     {

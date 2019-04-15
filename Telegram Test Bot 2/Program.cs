@@ -11,7 +11,7 @@ using Telegram.Bot.Types.Enums;
 
 
 
-namespace Telegram_Test_Bot_2
+namespace ChatBot
 {
     class Program
     {

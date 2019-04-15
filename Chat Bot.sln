@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.539
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegram Test Bot 2", "Telegram Test Bot 2\Telegram Test Bot 2.csproj", "{8F85F6BD-441C-422F-82B8-C39C3AA55F07}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat Bot", "Telegram Test Bot 2\Chat Bot.csproj", "{8F85F6BD-441C-422F-82B8-C39C3AA55F07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
