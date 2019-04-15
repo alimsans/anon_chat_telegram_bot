@@ -36,7 +36,7 @@ namespace ChatBot
                 return false;
         }
 
-        //Send message to the other User
+        //send message to the other User
         public async Task SendMessage(MessageEventArgs e, MessageType type)
         {
             long recieverId = await getRecieverId(e.Message.Chat.Id);
@@ -44,13 +44,37 @@ namespace ChatBot
             if (e.Message.Type == MessageType.Text)
             {
                 await Program.m_BotClient.SendTextMessageAsync
-                    (chatId: recieverId,
-                    text: e.Message.Text);
+                    (chatId: recieverId, text: e.Message.Text);
+            }
+            else if (e.Message.Type == MessageType.Sticker)
+            {
+                await Program.m_BotClient.SendStickerAsync
+                    (chatId: recieverId, sticker: e.Message.Sticker.FileId);
+            }
+            else if (e.Message.Type == MessageType.Voice)
+            {
+                await Program.m_BotClient.SendVoiceAsync
+                    (chatId: recieverId, voice: e.Message.Voice.FileId);
             }
             else if (e.Message.Type == MessageType.Photo)
             {
                 await Program.m_BotClient.SendPhotoAsync
                     (chatId: recieverId, photo: e.Message.Photo[0].FileId, caption: e.Message.Caption);
+            }
+            else if (e.Message.Type == MessageType.Audio)
+            {
+                await Program.m_BotClient.SendAudioAsync
+                    (chatId: recieverId, audio: e.Message.Audio.FileId, caption: e.Message.Caption);
+            }
+            else if (e.Message.Type == MessageType.Video)
+            {
+                await Program.m_BotClient.SendVideoAsync
+                    (chatId: recieverId, video: e.Message.Video.FileId, caption: e.Message.Caption);
+            }
+            else if (e.Message.Type == MessageType.VideoNote)
+            {
+                await Program.m_BotClient.SendVideoNoteAsync
+                    (chatId: recieverId, videoNote: e.Message.VideoNote.FileId);
             }
             else
             {
