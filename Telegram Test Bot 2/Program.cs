@@ -67,7 +67,7 @@ namespace ChatBot
                 {
                     if (i.HasUser(e.Message.Chat.Id))
                     {
-                        await i.SendMessage(e);
+                        await i.SendMessage(e, e.Message.Type);
                         return;
                     }
                 }

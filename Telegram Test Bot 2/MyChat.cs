@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.IO;
 
 
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-
-
+using Telegram.Bot.Types.InputFiles;
 
 namespace ChatBot
 {
@@ -37,9 +37,9 @@ namespace ChatBot
         }
 
         //Send message to the other User
-        public async Task SendMessage(MessageEventArgs e)
+        public async Task SendMessage(MessageEventArgs e, MessageType type)
         {
-            if (e.Message.Text != null)
+            if (e.Message.Type == MessageType.Text)
             {
                 if (e.Message.Chat.Id == m_FirstUser.ChatId.Identifier)
                     await Program.m_BotClient.SendTextMessageAsync
@@ -50,8 +50,20 @@ namespace ChatBot
                         (chatId: m_FirstUser.ChatId,
                         text: e.Message.Text);
             }
+            else if (e.Message.Type == MessageType.Photo)
+            {
+                if (e.Message.Chat.Id == m_FirstUser.ChatId.Identifier)
+                    await Program.m_BotClient.SendPhotoAsync
+                        (chatId: m_SecondUser.ChatId, photo: e.Message.Photo[0].FileId, caption: e.Message.Caption);
+                else
+                    await Program.m_BotClient.SendPhotoAsync
+                        (chatId: m_FirstUser.ChatId, photo: e.Message.Photo[0].FileId, caption: e.Message.Caption);
+            }
             else
             {
+                //if reached here, message type not supported 
+                //respond with 'not supported' message
+                //print to console
                 await Program.m_BotClient.SendTextMessageAsync(chatId: m_FirstUser.ChatId, text: $"<code>{e.Message.Type}s not supported yet</code>", parseMode: ParseMode.Html);
                 await Program.m_BotClient.SendTextMessageAsync(chatId: m_SecondUser.ChatId, text: $"<code>{e.Message.Type}s not supported yet</code>", parseMode: ParseMode.Html);
                 Console.ForegroundColor = ConsoleColor.Red;
