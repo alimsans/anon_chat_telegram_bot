@@ -39,25 +39,18 @@ namespace ChatBot
         //Send message to the other User
         public async Task SendMessage(MessageEventArgs e, MessageType type)
         {
+            long recieverId = await getRecieverId(e.Message.Chat.Id);
+
             if (e.Message.Type == MessageType.Text)
             {
-                if (e.Message.Chat.Id == m_FirstUser.ChatId.Identifier)
-                    await Program.m_BotClient.SendTextMessageAsync
-                        (chatId: m_SecondUser.ChatId,
-                        text: e.Message.Text);
-                else
-                    await Program.m_BotClient.SendTextMessageAsync
-                        (chatId: m_FirstUser.ChatId,
-                        text: e.Message.Text);
+                await Program.m_BotClient.SendTextMessageAsync
+                    (chatId: recieverId,
+                    text: e.Message.Text);
             }
             else if (e.Message.Type == MessageType.Photo)
             {
-                if (e.Message.Chat.Id == m_FirstUser.ChatId.Identifier)
-                    await Program.m_BotClient.SendPhotoAsync
-                        (chatId: m_SecondUser.ChatId, photo: e.Message.Photo[0].FileId, caption: e.Message.Caption);
-                else
-                    await Program.m_BotClient.SendPhotoAsync
-                        (chatId: m_FirstUser.ChatId, photo: e.Message.Photo[0].FileId, caption: e.Message.Caption);
+                await Program.m_BotClient.SendPhotoAsync
+                    (chatId: recieverId, photo: e.Message.Photo[0].FileId, caption: e.Message.Caption);
             }
             else
             {
@@ -73,6 +66,14 @@ namespace ChatBot
                     $"\nUnsupported Message Type {e.Message.Type}");
                 Console.ForegroundColor = ConsoleColor.White;
             }
+        }
+
+        private Task<long> getRecieverId(long e)
+        {
+            if (e == m_FirstUser.ChatId.Identifier)
+                return Task.FromResult(m_SecondUser.ChatId.Identifier);
+            else
+                return Task.FromResult(m_FirstUser.ChatId.Identifier);
         }
     }
 }
