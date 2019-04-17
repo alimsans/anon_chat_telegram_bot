@@ -12,7 +12,7 @@ namespace ChatBot
     {
         public static async Task NewChat(ChatId chatId)
         {
-            User i = Program.GetUser(chatId);
+            User i = Program.GetOrCreateAddUser(chatId);
             if (i.ChatId.Identifier == chatId.Identifier)
             {
                 if (i.Status == User.UserStatus.InChat)
@@ -22,14 +22,12 @@ namespace ChatBot
                         text:
                         "You are already in chat!\n" +
                         "/leavechat to leave the current chat");
-                    return;
                 }
                 else if (i.Status == User.UserStatus.InSearch)
                 {
                     await Program.m_BotClient.SendTextMessageAsync
                         (chatId: chatId,
                         text: "You are already waiting for a chat :)");
-                    return;
                 }
                 else
                 {
@@ -42,9 +40,10 @@ namespace ChatBot
                         if (j.ChatId.Identifier != i.ChatId.Identifier
                             && j.Status == User.UserStatus.InSearch)
                         {
-                            Program.m_Chats.Add(new MyChat(i, j));
+                            i.AddReciever(j.ChatId);
+                            j.AddReciever(i.ChatId);
                             await Program.m_BotClient.SendTextMessageAsync
-                                (chatId: chatId, text: "Found a chat for you!\nBe nice!");
+                                (chatId: i.ChatId, text: "Found a chat for you!\nBe nice!");
                             await Program.m_BotClient.SendTextMessageAsync
                                 (chatId: j.ChatId, text: "Found a chat for you!\nBe nice!");
                             return;
@@ -56,23 +55,22 @@ namespace ChatBot
 
         public static async Task Leave(ChatId chatId)
         {
-            User i = Program.GetUser(chatId);
-            for (int j = 0; j < Program.m_Chats.Count - 1; j++)
+            User i = Program.GetOrCreateAddUser(chatId);
+            foreach (User j in Program.m_Users)
             {
-                if (Program.m_Chats[j].HasUser(i.ChatId))
+                if (j.ChatId == i.ChatId_Reciever)
                 {
-                    Program.m_Chats.RemoveAt(j);
-                    Program.m_Chats[j].ChatIdFirst.Status = User.UserStatus.None;
-                    Program.m_Chats[j].ChatIdSecond.Status = User.UserStatus.None;
-                    await Program.m_BotClient.SendTextMessageAsync
-                        (chatId: chatId,
-                        text:
-                        "You left the chat\n" +
-                        "/help for all commands");
+                    i.RemoveReciever();
+                    j.RemoveReciever();
                     await Program.m_BotClient.SendTextMessageAsync
                         (chatId: i.ChatId,
                         text:
-                        "Your companion left the chat\n" +
+                        "You have left the chat\n" +
+                        "/help for all commands");
+                    await Program.m_BotClient.SendTextMessageAsync
+                        (chatId: j.ChatId,
+                        text:
+                        "Your companion has left the chat\n" +
                         "/help for all commands");
                     return;
                 }
@@ -81,7 +79,7 @@ namespace ChatBot
 
         public static async Task Start(ChatId chatId)
         {
-            User i = Program.GetUser(chatId.Identifier);
+            User i = Program.GetOrCreateAddUser(chatId);
             if (i.ChatId.Identifier == chatId.Identifier)
             {
                 await Program.m_BotClient.SendTextMessageAsync
@@ -93,8 +91,6 @@ namespace ChatBot
             }
 
             ///if reached here, user is unregistered
-            Program.m_Users.Add(new User(chatId));
-            Program.m_Users[Program.m_Users.Count - 1].Status = User.UserStatus.None;
             await Program.m_BotClient.SendTextMessageAsync
                 (chatId: chatId,
                 text:

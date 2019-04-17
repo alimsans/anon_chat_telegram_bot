@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 
@@ -17,7 +18,6 @@ namespace ChatBot
     {
         public static ITelegramBotClient m_BotClient;
         public static List<User> m_Users = new List<User>();
-        public static List<MyChat> m_Chats = new List<MyChat>();
 
 
         static void Main(string[] args)
@@ -42,40 +42,22 @@ namespace ChatBot
 
         private static async void Bot_OnMessage(object sender, MessageEventArgs e)
         {
-            ///Check if the user is already in chat
-            ///if not, add to Chats collection
             if (e.Message.Text == "/newchat")
-            {
                 await CommandHandler.NewChat(e.Message.Chat);
-                return;
-            }
-            else if (e.Message.Text == "/leave")
-            {
+            else if (e.Message.Text == "/leavechat")
                 await CommandHandler.Leave(e.Message.Chat);
-                return;
-            }
-            ///Check if user is already registered
-            ///if not, add to Users collection
             else if (e.Message.Text == "/start")
-            {
                 await CommandHandler.Start(e.Message.Chat);
-                return;
-            }
             ///if reached here, the message is sent to according chat
+            else
             {
-                foreach (MyChat i in m_Chats)
-                {
-                    if (i.HasUser(e.Message.Chat.Id))
-                    {
-                        await i.SendMessage(e, e.Message.Type);
-                        return;
-                    }
-                }
+                User tmp = GetOrCreateAddUser(e.Message.Chat);
+                tmp.SendMessage(e);
             }
         }
 
         //Returns a User object from m_Users collection
-        public static User GetUser(ChatId chatId)
+        public static User GetOrCreateAddUser(ChatId chatId)
         {
             foreach (User i in m_Users)
             {
@@ -84,10 +66,12 @@ namespace ChatBot
                     return i;
                 }
             }
-
+            //if reached here, User does not exist
+            //creating and adding User to m_Users
             User user = new User(chatId);
             m_Users.Add(user);
             return user;
         }
+
     }
 }
