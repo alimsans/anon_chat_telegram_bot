@@ -27,7 +27,7 @@ namespace ChatBot
             Status = UserStatus.None;
         }
 
-        public async void SendMessage(MessageEventArgs e)
+        public async Task SendMessage(MessageEventArgs e)
         {
             if (ChatId_Reciever != null)
             {
@@ -68,11 +68,11 @@ namespace ChatBot
                 }
                 else
                 {
-                    //if reached here, message type not supported 
-                    //respond with 'not supported' message
+                    //if reached here, LastMessage type not supported 
+                    //respond with 'not supported' LastMessage
                     //print to console
                     await Program.m_BotClient.SendTextMessageAsync(chatId: ChatId, text: $"<code>{e.Message.Type}s not supported yet</code>", parseMode: ParseMode.Html);
-                    await Program.m_BotClient.SendTextMessageAsync(chatId: ChatId, text: $"<code>{e.Message.Type}s not supported yet</code>", parseMode: ParseMode.Html);
+                    await Program.m_BotClient.SendTextMessageAsync(chatId: ChatId_Reciever, text: $"<code>{e.Message.Type}s not supported yet</code>", parseMode: ParseMode.Html);
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine
                         ("[ERROR]:" +

@@ -9,6 +9,7 @@ using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Exceptions;
 
 
 
@@ -27,7 +28,7 @@ namespace ChatBot
 
             var me = m_BotClient.GetMeAsync().Result;
             Console.WriteLine
-                ($"Hello, World! I am user {me.Id} and my name is {me.FirstName}.\nWe're set to go.");
+                ($"Bot id is {me.Id}\nId: {me.FirstName}.\nWe're set to go.");
 
 
             m_BotClient.OnMessage += Bot_OnMessage;
@@ -52,7 +53,14 @@ namespace ChatBot
             else
             {
                 User tmp = GetOrCreateAddUser(e.Message.Chat);
-                tmp.SendMessage(e);
+                try
+                {
+                    await tmp.SendMessage(e);
+                }
+                catch (ApiRequestException)
+                {
+                    m_Users.Remove(GetOrCreateAddUser(tmp.ChatId_Reciever));
+                }
             }
         }
 
