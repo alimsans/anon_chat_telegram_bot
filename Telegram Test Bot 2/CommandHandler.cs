@@ -13,7 +13,7 @@ namespace ChatBot
         public static async Task NewChat(ChatId chatId)
         {
             User i = Program.GetOrCreateAddUser(chatId);
-            if (i.ChatId.Identifier == chatId.Identifier)
+            if (i.ChatIdentifier == chatId.Identifier)
             {
                 if (i.Status == User.UserStatus.InChat)
                 {
@@ -37,15 +37,15 @@ namespace ChatBot
                         text: "You're now waiting for a chat :)");
                     foreach (User j in Program.m_Users)
                     {
-                        if (j.ChatId.Identifier != i.ChatId.Identifier
+                        if (j.ChatIdentifier != i.ChatIdentifier
                             && j.Status == User.UserStatus.InSearch)
                         {
-                            i.AddReciever(j.ChatId);
-                            j.AddReciever(i.ChatId);
+                            i.AddReciever(j.ChatIdentifier);
+                            j.AddReciever(i.ChatIdentifier);
                             await Program.m_BotClient.SendTextMessageAsync
-                                (chatId: i.ChatId, text: "Found a chat for you!\nBe nice!");
+                                (chatId: i.ChatIdentifier, text: "Found a chat for you!\nBe nice!");
                             await Program.m_BotClient.SendTextMessageAsync
-                                (chatId: j.ChatId, text: "Found a chat for you!\nBe nice!");
+                                (chatId: j.ChatIdentifier, text: "Found a chat for you!\nBe nice!");
                             return;
                         }
                     }
@@ -58,17 +58,17 @@ namespace ChatBot
             User i = Program.GetOrCreateAddUser(chatId);
             foreach (User j in Program.m_Users)
             {
-                if (j.ChatId == i.ChatId_Reciever)
+                if (j.ChatIdentifier == i.ChatIdentifier_Reciever)
                 {
                     i.RemoveReciever();
                     j.RemoveReciever();
                     await Program.m_BotClient.SendTextMessageAsync
-                        (chatId: i.ChatId,
+                        (chatId: i.ChatIdentifier,
                         text:
                         "You have left the chat\n" +
                         "/help for all commands");
                     await Program.m_BotClient.SendTextMessageAsync
-                        (chatId: j.ChatId,
+                        (chatId: j.ChatIdentifier,
                         text:
                         "Your companion has left the chat\n" +
                         "/help for all commands");
@@ -80,7 +80,7 @@ namespace ChatBot
         public static async Task Start(ChatId chatId)
         {
             User i = Program.GetOrCreateAddUser(chatId);
-            if (i.ChatId.Identifier == chatId.Identifier)
+            if (i.ChatIdentifier == chatId.Identifier)
             {
                 await Program.m_BotClient.SendTextMessageAsync
                     (chatId: chatId,

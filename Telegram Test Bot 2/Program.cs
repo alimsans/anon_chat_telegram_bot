@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Xml.Linq;
+using System.Xml.Serialization;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Xml;
 
 
 using Telegram.Bot;
@@ -15,6 +17,7 @@ using Telegram.Bot.Exceptions;
 
 namespace ChatBot
 {
+
     class Program
     {
         public static ITelegramBotClient m_BotClient;
@@ -28,15 +31,26 @@ namespace ChatBot
 
             var me = m_BotClient.GetMeAsync().Result;
             Console.WriteLine
-                ($"Bot id is {me.Id}\nId: {me.FirstName}.\nWe're set to go.");
+                ($"Bot id is {me.Id}\nName: {me.FirstName} {me.LastName}\n{me.Username}.\nWe're set to go.");
 
+            ReadXML();
 
             m_BotClient.OnMessage += Bot_OnMessage;
             m_BotClient.StartReceiving();
 
 
+
             while (true)
-                Console.ReadLine();
+            {
+                string cmd = Console.ReadLine();
+                if (cmd.ToLower() == "serialize" || cmd.ToLower() == "save")
+                    ConsoleHandler.Serialize();
+                else if(cmd.ToLower() == "serialize close" || cmd.ToLower() == "save close")
+                {
+                    ConsoleHandler.Serialize();
+                    return;
+                }
+            }
         }
 
 
@@ -55,21 +69,23 @@ namespace ChatBot
                 User tmp = GetOrCreateAddUser(e.Message.Chat);
                 try
                 {
-                    await tmp.SendMessage(e);
+                    await tmp.SendMessageAsync(e);
                 }
                 catch (ApiRequestException)
                 {
-                    m_Users.Remove(GetOrCreateAddUser(tmp.ChatId_Reciever));
+                    m_Users.Remove(GetOrCreateAddUser(tmp.ChatIdentifier_Reciever));
+                    tmp.RemoveReciever();
                 }
             }
         }
 
-        //Returns a User object from m_Users collection
+        ///<summary>Returns a User object from m_Users collection
+        ///or creates one and adds to m_Users list</summary> 
         public static User GetOrCreateAddUser(ChatId chatId)
         {
             foreach (User i in m_Users)
             {
-                if (i.ChatId.Identifier == chatId.Identifier)
+                if (i.ChatIdentifier == chatId.Identifier)
                 {
                     return i;
                 }
@@ -81,5 +97,43 @@ namespace ChatBot
             return user;
         }
 
+        public static void WriteXML()
+        {
+            Console.WriteLine("Starting to serialize users data.");
+
+            FileStream file = new FileStream("DataUsers.xml", FileMode.Create);
+            DataContractSerializer serializer = new DataContractSerializer(typeof(List<User>));
+
+            serializer.WriteObject(file, m_Users);
+            file.Close();
+
+            Console.WriteLine("Finished to serialize users data.");
+        }
+
+        public static void ReadXML()
+        {
+            Console.WriteLine("Starting to deserialize users data.");
+            FileStream file = null;
+            try
+            {
+                file = new FileStream("DataUsers.xml", FileMode.Open);
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("No users data found.");
+                return;
+            }
+
+            XmlDictionaryReader reader = 
+                XmlDictionaryReader.CreateTextReader(file, new XmlDictionaryReaderQuotas());
+            DataContractSerializer serializer = new DataContractSerializer(typeof(List<User>));
+
+            m_Users = (List<User>)serializer.ReadObject(reader, true);
+            
+            reader.Close();
+            file.Close();
+
+            Console.WriteLine("Finished to deserialize users data.");
+        }
     }
 }
