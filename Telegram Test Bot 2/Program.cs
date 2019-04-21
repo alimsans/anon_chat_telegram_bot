@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Xml.Linq;
-using System.Xml.Serialization;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
@@ -26,7 +24,7 @@ namespace ChatBot
 
         static void Main(string[] args)
         {
-            m_BotClient = new TelegramBotClient("806503282:AAGIoImWwxsdWDM1_MJdVl_7GLs75vHuFkA")
+            m_BotClient = new TelegramBotClient("///")
             { Timeout = TimeSpan.FromSeconds(30) };
 
             var me = m_BotClient.GetMeAsync().Result;
@@ -37,7 +35,6 @@ namespace ChatBot
 
             m_BotClient.OnMessage += Bot_OnMessage;
             m_BotClient.StartReceiving();
-
 
 
             while (true)
